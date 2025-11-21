@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sistema Acadêmico — Versão 3.0</title>
+<style>
+  :root{
+    --bg:#07101a;
+    --panel:#0e1720;
+    --muted:#9fb0c8;
+    --accent:#7c5cff;
+    --accent-2:#00e5ff;
+    --card:#0f1a26;
+    --success:#2bd98b;
+    --danger:#ff6b6b;
+    --radius:12px;
+    --glass: rgba(255,255,255,0.03);
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background: linear-gradient(180deg,#05070a 0%, #071428 60%);
+    color:#e6f3ff;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding:24px;
+  }
+
+  .layout{
+    max-width:1200px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns:300px 1fr;
+    gap:20px;
+  }
+  @media(max-width:920px){
+    .layout{grid-template-columns:1fr;padding:12px}
+  }
+
+  /* SIDEBAR */
+  .sidebar{
+    background:linear-gradient(180deg, rgba(124,92,255,0.04), rgba(0,229,255,0.02));
+    padding:18px;
+    border-radius:var(--radius);
+    border:1px solid rgba(255,255,255,0.03);
+    height:fit-content;
+  }
+  .brand{display:flex;gap:12px;align-items:center}
+  .logo{
+    width:56px;height:56px;border-radius:10px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:flex;justify-content:center;align-items:center;font-weight:800;color:#031428
+  }
+  .brand h1{margin:0;font-size:18px}
+  .brand .muted{color:var(--muted);font-size:13px}
+
+  .nav{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+  .nav button{
+    background:transparent;border:0;padding:10px;border-radius:10px;color:var(--muted);text-align:left;cursor:pointer;font-weight:700;
+  }
+  .nav button.active{background:linear-gradient(90deg, rgba(124,92,255,0.06), rgba(0,229,255,0.03));color:var(--accent);}
+
+  .side-foot{margin-top:18px;color:var(--muted);font-size:13px}
+  .side-actions{display:flex;gap:8px;margin-top:10px}
+
+  /* MAIN */
+  .main{padding:18px;border-radius:var(--radius);background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.005));border:1px solid rgba(255,255,255,0.03)}
+  .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  h2{margin:0;color:var(--accent)}
+
+  .card{background:var(--card);padding:14px;border-radius:10px;border:1px solid var(--glass);margin-bottom:12px}
+  .muted{color:var(--muted);font-size:13px}
+  .input, select, textarea{
+    width:100%;padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);background:transparent;color:var(--muted);
+  }
+  label {font-size:13px;color:var(--muted);display:block;margin-top:10px}
+
+  .btn{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#021020;border:0;padding:10px 12px;border-radius:10px;cursor:pointer;font-weight:700}
+  .btn.ghost{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted)}
+  .btn.danger{background:linear-gradient(90deg,var(--danger),#ff9b9b);color:#041018}
+  .btn.small{padding:6px 8px;font-size:13px;border-radius:8px}
+
+  table{width:100%;border-collapse:collapse}
+  th,td{padding:10px;text-align:left;border-bottom:1px solid rgba(255,255,255,0.02);font-size:14px}
+  .tag{display:inline-block;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,0.02);color:var(--muted);font-weight:700}
+
+  .center{display:flex;align-items:center;justify-content:center;flex-direction:column;padding:18px}
+  .footer{font-size:13px;color:var(--muted);margin-top:8px}
+
+  /* modal */
+  .modalWrap{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(2,6,10,0.6);z-index:60}
+  .modal{width:720px;max-width:94%;background:var(--panel);padding:16px;border-radius:12px;border:1px solid rgba(255,255,255,0.03)}
+  .modal h3{margin:0;color:var(--accent)}
+  .flex{display:flex;gap:10px;align-items:center}
+  .stack{display:flex;flex-direction:column;gap:8px}
+
+  /* small helper */
+  .muted-italic{color:var(--muted);font-style:italic}
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo">SA</div>
+      <div>
+        <h1>Sistema Acadêmico</h1>
+        <div class="muted">Versão local</div>
+      </div>
+    </div>
+
+    <nav class="nav" id="nav"></nav>
+
+    <div class="side-foot">
+      <div id="whoami" class="muted">Não logado</div>
+      <div class="side-actions">
+        <button id="btnOpenLogin" class="btn.ghost btn small">Entrar</button>
+        <button id="btnLogout" class="btn.ghost btn small" style="display:none">Sair</button>
+      </div>
+      <div class="footer muted-italic">Sistema para demonstração (local)</div>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+    <!-- conteúdo gerado pelo JS -->
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modalWrap" id="modalWrap"><div class="modal" id="modal">
+  <h3 id="modalTitle"></h3>
+  <div id="modalBody" style="margin-top:10px"></div>
+  <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px">
+    <button id="modalCancel" class="btn.ghost btn small">Cancelar</button>
+    <button id="modalOk" class="btn btn small">Confirmar</button>
+  </div>
+</div></div>
+
+<script>
+/* ---------- Storage keys & helpers ---------- */
+const K_USERS='sa_v3_users', K_SUBS='sa_v3_subs', K_ENR='sa_v3_enr', K_LOG='sa_v3_log';
+const $ = id => document.getElementById(id);
+const navEl = document.getElementById('nav'), mainEl = document.getElementById('main'), whoami = document.getElementById('whoami');
+const modalWrap = document.getElementById('modalWrap'), modalTitle = document.getElementById('modalTitle'), modalBody = document.getElementById('modalBody'), modalOk = document.getElementById('modalOk'), modalCancel = document.getElementById('modalCancel');
+
+function load(k){ return JSON.parse(localStorage.getItem(k) || '[]') }
+function save(k,v){ localStorage.setItem(k, JSON.stringify(v)) }
+function getLog(){ return JSON.parse(localStorage.getItem(K_LOG) || 'null') }
+function setLog(u){ localStorage.setItem(K_LOG, JSON.stringify(u)) }
+function clearLog(){ localStorage.removeItem(K_LOG) }
+function genId(){ return Math.random().toString(36).slice(2,10) }
+function toast(msg){ alert(msg) }
+
+/* ---------- Bootstrap defaults (if empty) ---------- */
+if(!localStorage.getItem(K_USERS)){
+  save(K_USERS, [
+    {username:'admin', password:'123', role:'admin', name:'Administrador'},
+    {username:'prof1', password:'123', role:'professor', name:'Prof. Demétrios'},
+    {username:'aluno1', password:'123', role:'aluno', name:'Mateus'}
+  ]);
+}
+if(!localStorage.getItem(K_SUBS)){
+  save(K_SUBS, [
+    {id: genId(), name:'Cálculo I', professor: 'prof1'},
+    {id: genId(), name:'Algoritmos', professor: null}
+  ]);
+}
+if(!localStorage.getItem(K_ENR)){
+  save(K_ENR, []);
+}
+
+/* ensure demo enrollment for first student if absent (optional) */
+(function ensureDemo(){
+  const users = load(K_USERS), subs = load(K_SUBS), enr = load(K_ENR);
+  const aluno = users.find(u=>u.role==='aluno');
+  const sub0 = subs[0];
+  if(aluno && sub0 && !enr.some(e=> e.student===aluno.username && e.subjectId===sub0.id)){
+    enr.push({subjectId: sub0.id, student: aluno.username, grades: [null,null,null]});
+    save(K_ENR, enr);
+  }
+})();
+
+/* ---------- Modal helpers ---------- */
+function openModal(title, bodyHtml, onConfirm){
+  modalTitle.textContent = title;
+  modalBody.innerHTML = bodyHtml;
+  modalWrap.style.display = 'flex';
+  modalOk.onclick = ()=>{ try{ onConfirm(); } catch(e){ console.error(e) } modalWrap.style.display='none'; };
+  modalCancel.onclick = ()=> modalWrap.style.display='none';
+}
+
+/* ---------- NAV & render boot ---------- */
+function renderNav(){
+  const user = getLog();
+  navEl.innerHTML = '';
+  if(!user){
+    navEl.innerHTML = `
+      <button class="btn small" onclick="showWelcome()">Início</button>
+      <button class="btn.ghost small" onclick="openRoleLogin('aluno')">Entrar como Aluno</button>
+      <button class="btn.ghost small" onclick="openRoleLogin('professor')">Entrar como Professor</button>
+      <button class="btn.ghost small" onclick="openRoleLogin('admin')">Entrar como Administrador</button>
+    `;
+    whoami.textContent = 'Não logado';
+    $('btnOpenLogin').style.display = 'inline-block';
+    $('btnLogout').style.display = 'none';
+    return;
+  }
+  whoami.textContent = `${user.name || user.username} • ${user.role}`;
+  $('btnOpenLogin').style.display = 'none';
+  $('btnLogout').style.display = 'inline-block';
+  if(user.role === 'admin'){
+    navEl.innerHTML = `
+      <button class="btn small" onclick="route('admin_home')">Painel Admin</button>
+      <button class="btn.ghost small" onclick="route('admin_users')">Usuários</button>
+      <button class="btn.ghost small" onclick="route('admin_subjects')">Disciplinas</button>
+      <button class="btn.ghost small" onclick="route('admin_enroll')">Matrículas</button>
+      <button class="btn.ghost small" onclick="route('profile')">Meu Perfil</button>
+    `;
+  } else if(user.role === 'professor'){
+    navEl.innerHTML = `
+      <button class="btn small" onclick="route('prof_home')">Painel Prof</button>
+      <button class="btn.ghost small" onclick="route('prof_subjects')">Minhas Disciplinas</button>
+      <button class="btn.ghost small" onclick="route('profile')">Meu Perfil</button>
+    `;
+  } else {
+    navEl.innerHTML = `
+      <button class="btn small" onclick="route('stu_home')">Painel Aluno</button>
+      <button class="btn.ghost small" onclick="route('stu_subjects')">Disciplinas</button>
+      <button class="btn.ghost small" onclick="route('stu_grades')">Minhas Notas</button>
+      <button class="btn.ghost small" onclick="route('profile')">Meu Perfil</button>
+    `;
+  }
+}
+
+/* route state */
+let ROUTE = 'welcome';
+function route(r){ ROUTE = r; renderMain(); }
+
+/* main rendering depending on auth & role */
+function renderMain(){
+  const user = getLog();
+  if(!user){ showWelcome(); return; }
+  if(user.role === 'admin') renderAdmin();
+  else if(user.role === 'professor') renderProfessor();
+  else renderStudent();
+}
+
+/* welcome */
+function showWelcome(){
+  renderNav();
+  mainEl.innerHTML = `<div class="center"><h2>Sistema Acadêmico</h2><div class="muted">Faça login para acessar</div></div>`;
+}
+
+/* login flow */
+function openRoleLogin(role){
+  openModal(`Entrar — ${role[0].toUpperCase()+role.slice(1)}`, `
+    <div class="stack">
+      <label>Usuário <input id="m_user" class="input"></label>
+      <label>Senha <input id="m_pass" type="password" class="input"></label>
+    </div>
+  `, ()=>{
+    const u = $('m_user').value.trim(), p = $('m_pass').value;
+    const users = load(K_USERS);
+    const f = users.find(x=> x.username===u && x.password===p && x.role===role);
+    if(!f){ toast('Credenciais inválidas'); return; }
+    setLog(f);
+    renderNav();
+    route(f.role==='admin'?'admin_home': f.role==='professor'?'prof_home':'stu_home');
+  });
+}
+function openLogin(){ openRoleLogin('aluno') } // default quick open
+
+$('btnOpenLogin').onclick = ()=> openRoleLogin('aluno');
+$('btnLogout').onclick = ()=>{ clearLog(); renderNav(); showWelcome(); }
+
+/* ---------- ADMIN ---------- */
+function renderAdmin(){
+  renderNav();
+  const user = getLog();
+  if(ROUTE === 'admin_home'){
+    const users = load(K_USERS), subs = load(K_SUBS), enr = load(K_ENR);
+    mainEl.innerHTML = `<div class="top"><div><h2>Painel Administrativo</h2><div class="muted">Visão geral</div></div></div>
+      <div class="card"><b>Usuários:</b> ${users.length} • <b>Disciplinas:</b> ${subs.length} • <b>Matrículas:</b> ${enr.length}</div>`;
+    return;
+  }
+  if(ROUTE === 'admin_users'){
+    const users = load(K_USERS);
+    mainEl.innerHTML = `<div class="top"><h2>Gerenciar Usuários</h2><div><button class="btn" onclick="adminCreateUser()">Criar</button></div></div>
+      <div class="card"><table><thead><tr><th>Nome</th><th>Usuário</th><th>Função</th><th>Ações</th></tr></thead><tbody>
+      ${users.map(u=>`<tr><td>${u.name||'-'}</td><td>${u.username}</td><td>${u.role}</td><td>
+      <button class="btn small" onclick="adminEditUser('${u.username}')">Editar</button> ${u.username!==user.username?`<button class="btn small btn.danger" onclick="adminRemoveUser('${u.username}')">Remover</button>`:''}
+      </td></tr>`).join('')}</tbody></table></div>`;
+    return;
+  }
+  if(ROUTE === 'admin_subjects'){
+    const subs = load(K_SUBS);
+    mainEl.innerHTML = `<div class="top"><h2>Gerenciar Disciplinas</h2><div><button class="btn" onclick="adminCreateSubject()">Criar</button></div></div>
+      <div class="card">${subs.length?`<table><thead><tr><th>Disciplina</th><th>Professor</th><th>Ações</th></tr></thead><tbody>
+      ${subs.map(s=>`<tr><td>${s.name}</td><td>${getUserName(s.professor)||'<i>sem</i>'}</td><td>
+      <button class="btn small" onclick="adminOpenSubject('${s.id}')">Abrir</button>
+      <button class="btn small btn.danger" onclick="adminRemoveSubject('${s.id}')">Remover</button></td></tr>`).join('')}
+      </tbody></table>`:'<div class="muted">Nenhuma disciplina</div>'}</div>`;
+    return;
+  }
+  if(ROUTE === 'admin_enroll'){
+    const subs = load(K_SUBS);
+    mainEl.innerHTML = `<div class="top"><h2>Gerenciar Matrículas</h2></div>
+      <div class="card">${subs.length?subs.map(s=>`<div style="margin-bottom:10px"><b>${s.name}</b> • Prof: ${getUserName(s.professor)||'<i>sem</i>'} <button class="btn small" onclick="adminEnrollModal('${s.id}')">Matricular aluno</button> <button class="btn small" onclick="adminOpenSubject('${s.id}')">Abrir</button></div>`).join(''):'<div class="muted">Nenhuma disciplina</div>'}</div>`;
+    return;
+  }
+  if(ROUTE === 'profile'){ renderProfile(); return; }
+
+  // default to admin_home
+  route('admin_home');
+}
+
+/* admin actions */
+function adminCreateUser(){
+  openModal('Criar Usuário', `
+    <div class="stack">
+      <label>Nome <input id="u_name" class="input"></label>
+      <label>Usuário <input id="u_username" class="input"></label>
+      <label>Senha <input id="u_pass" class="input" type="password"></label>
+      <label>Função <select id="u_role" class="input"><option value="aluno">Aluno</option><option value="professor">Professor</option><option value="admin">Admin</option></select></label>
+    </div>
+  `, ()=>{
+    const name = $('u_name').value.trim(), username = $('u_username').value.trim(), pass = $('u_pass').value, role = $('u_role').value;
+    if(!username || !pass){ toast('Usuário e senha obrigatórios'); return; }
+    const users = load(K_USERS);
+    if(users.some(u=> u.username===username)){ toast('Usuário já existe'); return; }
+    users.push({username, password:pass, role, name});
+    save(K_USERS, users);
+    toast('Usuário criado');
+    route('admin_users');
+  });
+}
+function adminEditUser(username){
+  const users = load(K_USERS), user = users.find(u=> u.username===username);
+  if(!user) return toast('não encontrado');
+  openModal('Editar Usuário', `
+    <div class="stack">
+      <label>Nome <input id="eu_name" class="input" value="${user.name||''}"></label>
+      <label>Senha (vazio mantém) <input id="eu_pass" class="input" type="password"></label>
+      <label>Função <select id="eu_role" class="input">
+        <option ${user.role==='aluno'?'selected':''} value="aluno">Aluno</option>
+        <option ${user.role==='professor'?'selected':''} value="professor">Professor</option>
+        <option ${user.role==='admin'?'selected':''} value="admin">Admin</option>
+      </select></label>
+    </div>
+  `, ()=>{
+    const name = $('eu_name').value.trim(), pass = $('eu_pass').value, role = $('eu_role').value;
+    const users = load(K_USERS); const idx = users.findIndex(u=> u.username===username);
+    users[idx].name = name || users[idx].name;
+    if(pass) users[idx].password = pass;
+    users[idx].role = role;
+    save(K_USERS, users);
+    toast('Atualizado'); route('admin_users');
+  });
+}
+function adminRemoveUser(username){
+  if(!confirm('Remover '+username+'?')) return;
+  save(K_USERS, load(K_USERS).filter(u=> u.username!==username));
+  // cleanup enrollments for removed student
+  save(K_ENR, load(K_ENR).filter(e=> e.student !== username));
+  toast('Removido'); route('admin_users');
+}
+
+/* admin subject actions */
+function adminCreateSubject(){
+  const profs = load(K_USERS).filter(u=> u.role==='professor');
+  openModal('Criar Disciplina', `
+    <div class="stack">
+      <label>Nome <input id="s_name" class="input"></label>
+      <label>Professor (opcional) <select id="s_prof" class="input"><option value="">--nenhum--</option>${profs.map(p=>`<option value="${p.username}">${p.name||p.username}</option>`).join('')}</select></label>
+    </div>
+  `, ()=>{
+    const name = $('s_name').value.trim(), prof = $('s_prof').value || null;
+    if(!name){ toast('Nome obrigatório'); return; }
+    const subs = load(K_SUBS);
+    if(subs.some(s=> s.name.toLowerCase()===name.toLowerCase())){ toast('Disciplina já existe'); return; }
+    subs.push({id:genId(), name, professor:prof});
+    save(K_SUBS, subs); toast('Disciplina criada'); route('admin_subjects');
+  });
+}
+function adminOpenSubject(id){
+  const s = load(K_SUBS).find(x=> x.id===id);
+  if(!s) return toast('não encontrado');
+  const enrolls = load(K_ENR).filter(e=> e.subjectId===id);
+  mainEl.innerHTML = `<div class="top"><div><h2>${s.name}</h2><div class="muted">Professor: ${getUserName(s.professor)||'<i>sem</i>'}</div></div></div>
+    <div class="card"><h3>Turma</h3>${enrolls.length?`<table><thead><tr><th>Aluno</th><th>Notas</th><th>Ação</th></tr></thead><tbody>${enrolls.map(e=>`<tr><td>${getUserName(e.student)}</td><td>${formatGrades(e.grades)}</td><td><button class="btn small btn.danger" onclick="adminUnenroll('${id}','${e.student}')">Remover</button></td></tr>`).join('')}</tbody></table>`:'<div class="muted">Nenhum aluno matriculado</div>'}
+    <div style="margin-top:12px"><button class="btn" onclick="adminEnrollModal('${id}')">Matricular aluno</button> <button class="btn ghost" onclick="route(\'admin_subjects\')">Voltar</button></div></div>`;
+}
+function adminRemoveSubject(id){
+  if(!confirm('Remover disciplina?')) return;
+  const subs = load(K_SUBS).filter(s=> s.id!==id); save(K_SUBS, subs);
+  save(K_ENR, load(K_ENR).filter(e=> e.subjectId!==id));
+  toast('Removida'); route('admin_subjects');
+}
+function adminEnrollModal(subjectId){
+  const studs = load(K_USERS).filter(u=> u.role==='aluno');
+  if(!studs.length){ toast('Nenhum aluno disponível'); return; }
+  const options = studs.map(s=>`<option value="${s.username}">${s.name||s.username}</option>`).join('');
+  openModal('Matricular Aluno', `<label>Aluno <select id="enr_sel" class="input">${options}</select></label>`, ()=>{
+    const stud = $('enr_sel').value;
+    const enr = load(K_ENR);
+    if(enr.some(x=> x.student===stud && x.subjectId===subjectId)){ toast('Aluno já matriculado'); return; }
+    enr.push({subjectId, student: stud, grades: [null,null,null]});
+    save(K_ENR, enr); toast('Matriculado'); adminOpenSubject(subjectId);
+  });
+}
+function adminUnenroll(subjectId,student){
+  if(!confirm('Remover matrícula?')) return;
+  save(K_ENR, load(K_ENR).filter(e=> !(e.subjectId===subjectId && e.student===student)));
+  toast('Removido'); adminOpenSubject(subjectId);
+}
+
+/* ---------- PROFESSOR ---------- */
+function renderProfessor(){
+  renderNav();
+  const me = getLog();
+  if(ROUTE === 'prof_home'){
+    mainEl.innerHTML = `<div class="top"><h2>Painel do Professor</h2><div class="muted">Minhas disciplinas e lançamento de notas</div></div>
+      <div class="card">${renderProfQuick()}</div>`;
+    return;
+  }
+  if(ROUTE === 'prof_subjects'){
+    const subs = load(K_SUBS).filter(s=> s.professor === me.username);
+    mainEl.innerHTML = `<div class="top"><h2>Minhas Disciplinas</h2><div><button class="btn" onclick="profCreateSubject()">Criar Disciplina</button></div></div>
+      <div class="card">${subs.length?`<table><thead><tr><th>Disciplina</th><th>Matrículas</th><th>Ações</th></tr></thead><tbody>${subs.map(s=>`<tr><td>${s.name}</td><td>${load(K_ENR).filter(e=> e.subjectId===s.id).length}</td><td><button class="btn small" onclick="profOpenSubject('${s.id}')">Abrir</button></td></tr>`).join('')}</tbody></table>`:'<div class="muted">Nenhuma disciplina atribuída</div>'}</div>`;
+    return;
+  }
+  if(ROUTE === 'profile'){ renderProfile(); return; }
+  // default
+  route('prof_home');
+}
+function renderProfQuick(){
+  const me = getLog(), subs = load(K_SUBS).filter(s=> s.professor===me.username);
+  if(!subs.length) return '<div class="muted">Nenhuma disciplina atribuída</div>';
+  return subs.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px"><div><b>${s.name}</b><div class="muted">Matrículas: ${load(K_ENR).filter(e=> e.subjectId===s.id).length}</div></div><div><button class="btn" onclick="profOpenSubject('${s.id}')">Abrir</button></div></div>`).join('');
+}
+function profCreateSubject(){
+  openModal('Criar Disciplina (Professor)', `<label>Nome <input id="p_sub_name" class="input"></label>`, ()=>{
+    const name = $('p_sub_name').value.trim(); if(!name) { toast('nome inválido'); return; }
+    const subs = load(K_SUBS); const id = genId();
+    subs.push({id, name, professor: getLog().username}); save(K_SUBS, subs); toast('Criada'); route('prof_subjects');
+  });
+}
+function profOpenSubject(id){
+  const s = load(K_SUBS).find(x=> x.id===id); if(!s) return toast('não encontrado');
+  const enrolls = load(K_ENR).filter(e=> e.subjectId===id);
+  mainEl.innerHTML = `<div class="top"><h2>${s.name}</h2><div class="muted">Professor: ${getUserName(s.professor)}</div></div>
+    <div class="card"><h3>Turma</h3>${enrolls.length?`<table><thead><tr><th>Aluno</th><th>Notas (3)</th><th>Ações</th></tr></thead><tbody>${enrolls.map(e=>`<tr><td>${getUserName(e.student)}</td><td>${formatGrades(e.grades)}</td><td>
+    <button class="btn small" onclick="profGradeModal('${id}','${e.student}')">Lançar/Editar</button> <button class="btn small btn.danger" onclick="profUnenroll('${id}','${e.student}')">Remover</button></td></tr>`).join('')}</tbody></table>`:'<div class="muted">Nenhum aluno matriculado</div>'}
+    <div style="margin-top:12px"><button class="btn" onclick="profEnrollModal('${id}')">Matricular aluno</button> <button class="btn ghost" onclick="route(\'prof_subjects\')">Voltar</button></div></div>`;
+}
+function profEnrollModal(subjectId){
+  const studs = load(K_USERS).filter(u=> u.role==='aluno');
+  if(!studs.length){ toast('Nenhum aluno disponível'); return; }
+  const options = studs.map(s=>`<option value="${s.username}">${s.name||s.username}</option>`).join('');
+  openModal('Matricular aluno', `<label>Aluno <select id="pe_sel" class="input">${options}</select></label>`, ()=>{
+    const stud = $('pe_sel').value;
+    const enr = load(K_ENR);
+    if(enr.some(x=> x.student===stud && x.subjectId===subjectId)){ toast('Aluno já matriculado'); return; }
+    enr.push({subjectId, student: stud, grades: [null,null,null]});
+    save(K_ENR, enr); toast('Matriculado'); profOpenSubject(subjectId);
+  });
+}
+function profUnenroll(subjectId,student){
+  if(!confirm('Remover matrícula?')) return;
+  save(K_ENR, load(K_ENR).filter(e=> !(e.subjectId===subjectId && e.student===student)));
+  toast('Removido'); profOpenSubject(subjectId);
+}
+function profGradeModal(subjectId, student){
+  const enr = load(K_ENR).find(e=> e.subjectId===subjectId && e.student===student);
+  if(!enr) return toast('inscrição não encontrada');
+  const vals = enr.grades.map(g=> g===null? '' : g );
+  openModal('Lançar/Editar Notas', `
+    <div class="stack">
+      <div class="muted">Aluno: ${getUserName(student)}</div>
+      <label>Nota 1 <input id="g1" class="input" type="number" min="0" max="10" step="0.1" value="${vals[0]}"></label>
+      <label>Nota 2 <input id="g2" class="input" type="number" min="0" max="10" step="0.1" value="${vals[1]}"></label>
+      <label>Nota 3 <input id="g3" class="input" type="number" min="0" max="10" step="0.1" value="${vals[2]}"></label>
+    </div>
+  `, ()=>{
+    const g1 = $('g1').value, g2 = $('g2').value, g3 = $('g3').value;
+    const enrList = load(K_ENR); const idx = enrList.findIndex(e=> e.subjectId===subjectId && e.student===student);
+    enrList[idx].grades = [ g1===''? null: parseFloat(g1), g2===''? null: parseFloat(g2), g3===''? null: parseFloat(g3) ];
+    save(K_ENR, enrList); toast('Notas salvas'); profOpenSubject(subjectId);
+  });
+}
+
+/* ---------- STUDENT ---------- */
+function renderStudent(){
+  renderNav();
+  const me = getLog();
+  if(ROUTE === 'stu_home'){
+    mainEl.innerHTML = `<div class="top"><h2>Painel do Aluno</h2><div class="muted">Suas disciplinas e notas</div></div><div class="card">${renderStudentQuick()}</div>`;
+    return;
+  }
+  if(ROUTE === 'stu_subjects'){
+    const subs = load(K_SUBS);
+    const myEnroll = load(K_ENR).filter(e=> e.student === me.username).map(e=> e.subjectId);
+    mainEl.innerHTML = `<div class="top"><h2>Disciplinas</h2></div>
+      <div class="card">${subs.length?subs.map(s=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;background:rgba(255,255,255,0.01);margin-bottom:8px"><div><b>${s.name}</b><div class="muted">Prof: ${getUserName(s.professor)||'<i>sem</i>'}</div></div><div>${myEnroll.includes(s.id)?'<span class="muted">Inscrito</span>':`<button class="btn small" onclick="stuEnroll('${s.id}')">Matricular</button>`}</div></div>`).join(''):'<div class="muted">Nenhuma disciplina</div>'}</div>`;
+    return;
+  }
+  if(ROUTE === 'stu_grades'){
+    mainEl.innerHTML = `<div class="top"><h2>Minhas Notas</h2></div><div class="card">${renderStudentGrades()}</div>`;
+    return;
+  }
+  if(ROUTE === 'profile'){ renderProfile(); return; }
+
+  route('stu_home');
+}
+function renderStudentQuick(){
+  const my = load(K_ENR).filter(e=> e.student=== getLog().username);
+  if(!my.length) return '<div class="muted">Nenhuma inscrição</div>';
+  return `<table><thead><tr><th>Disciplina</th><th>Professor</th><th>Média</th><th>Status</th></tr></thead><tbody>${my.map(m=> {
+    const s = load(K_SUBS).find(x=> x.id===m.subjectId);
+    const avg = computeAvg(m.grades);
+    return `<tr><td>${s? s.name : '—'}</td><td>${getUserName(s? s.professor : null)}</td><td>${avg===null?'-':avg.toFixed(2)}</td><td>${avg===null?'<span class="muted">Sem notas</span>':(avg>=6?'<span style="color:var(--success)">Aprovado</span>':'<span style="color:var(--danger)">Reprovado</span>')}</td></tr>`;
+  }).join('')}</tbody></table>`;
+}
+function stuEnroll(subjectId){
+  const u = getLog();
+  const enr = load(K_ENR);
+  if(enr.some(e=> e.student===u.username && e.subjectId===subjectId)){ toast('Você já está matriculado'); return; }
+  enr.push({subjectId, student: u.username, grades: [null,null,null]});
+  save(K_ENR, enr); toast('Matriculado'); route('stu_subjects');
+}
+function renderStudentGrades(){
+  const my = load(K_ENR).filter(e=> e.student === getLog().username);
+  if(!my.length) return '<div class="muted">Nenhuma inscrição</div>';
+  return `<table><thead><tr><th>Disciplina</th><th>Professor</th><th>Notas</th><th>Média</th><th>Situação</th></tr></thead><tbody>${my.map(m=>{
+    const s = load(K_SUBS).find(x=> x.id===m.subjectId);
+    const avg = computeAvg(m.grades);
+    return `<tr><td>${s? s.name:'-'}</td><td>${getUserName(s? s.professor:null)}</td><td>${formatGrades(m.grades)}</td><td>${avg===null?'-':avg.toFixed(2)}</td><td>${avg===null?'<span class="muted">Sem notas</span>': (avg>=6?'<span style="color:var(--success)">Aprovado</span>':'<span style="color:var(--danger)">Reprovado</span>')}</td></tr>`;
+  }).join('')}</tbody></table>`;
+}
+
+/* ---------- PROFILE ---------- */
+function renderProfile(){
+  const u = getLog(); if(!u) return;
+  mainEl.innerHTML = `<div class="top"><h2>Meu Perfil</h2></div>
+    <div class="card"><label>Nome <input id="pf_name" class="input" value="${u.name||''}"></label>
+    <label>Senha (vazio mantém) <input id="pf_pass" class="input" type="password"></label>
+    <div style="margin-top:12px"><button class="btn" onclick="saveProfile()">Salvar</button> <button class="btn ghost" onclick="route('${u.role==='admin'?'admin_home':u.role==='professor'?'prof_home':'stu_home'}')">Voltar</button></div></div>`;
+}
+function saveProfile(){
+  const name = $('pf_name').value.trim(), pass = $('pf_pass').value;
+  const users = load(K_USERS); const cur = getLog(); const idx = users.findIndex(x=> x.username===cur.username);
+  users[idx].name = name || users[idx].name; if(pass) users[idx].password = pass;
+  save(K_USERS, users); setLog(users[idx]); toast('Salvo'); renderNav(); renderMain();
+}
+
+/* ---------- utils ---------- */
+function getUserName(username){ if(!username) return null; const u = load(K_USERS).find(x=> x.username===username); return u? (u.name || u.username) : username }
+function formatGrades(gs){ return gs.map(g=> g===null? '-' : g).join(' | ') }
+function computeAvg(gs){
+  if(!gs || gs.length<3) return null;
+  if(gs.some(g=> g===null || g===undefined || isNaN(g))) return null;
+  return (gs[0]+gs[1]+gs[2]) / 3;
+}
+
+/* expose small API for inline handlers */
+window.route = route;
+window.openRoleLogin = openRoleLogin;
+window.openLogin = openLogin;
+
+/* boot */
+renderNav();
+const cur = getLog();
+if(cur){
+  route(cur.role==='admin'?'admin_home': cur.role==='professor'?'prof_home':'stu_home');
+} else showWelcome();
+
+</script>
+</body>
+</html>
